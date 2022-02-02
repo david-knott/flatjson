@@ -1,0 +1,39 @@
+{
+	"random": 11,
+	"random float": 81.152,
+	"bool": false,
+	"date": "1994-09-15",
+	"regEx": "helloooooooooooooooooooooooooooooooooooo to you",
+	"enum": "json",
+	"firstname": "Wileen",
+	"lastname": "Torray",
+	"city": "Rawalpindi",
+	"country": "Maldives",
+	"countryCode": "PW",
+	"email uses current data": "Wileen.Torray@gmail.com",
+	"email from expression": "Wileen.Torray@yopmail.com",
+	"array": [
+		"Netty",
+		"Gabriellia",
+		"Madalyn",
+		"Jordan",
+		"Calla"
+	],
+	"array of objects": [
+		{
+			"index": 0,
+			"index start at 5": 5
+		},
+		{
+			"index": 1,
+			"index start at 5": 6
+		},
+		{
+			"index": 2,
+			"index start at 5": 7
+		}
+	],
+	"Sandie": {
+		"age": 68
+	}
+}

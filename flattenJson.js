@@ -1,32 +1,5 @@
-
-const ar = {
-    "a": "a",
-	"b": [
-		{ "c" : 22, "d" : 33 },
-		{ "c" : 44, "d" : 55 },
-		{ "d" : 77, "c" : 66 },
-        { "z" : 77, "x" : 66 },
-        { "d" : 777, "c" : 666, "a": 11 },
-        { "d" : 777, "c" : 666, "a": 11, "z": "2", "x": "3" },
-        
-        
-	],
-    /*
-    "d": {
-        "a" : 11,
-        "b" : 111,
-        "c" : [
-            { "a" : 1111, "b" : 2222},
-            { "b" : 4444, "a" : 3333 },
-            { "x" : 3333, "y" : 4444},
-            
-        ]
-    },
-    "e": {
-        "a" : 'ea',
-        "b" : 'eb'
-    }*/
-};
+var fs = require('fs');
+const bigJSON = JSON.parse(fs.readFileSync('test.json', 'utf8'));
 
 // is va an object ?
 const isObject = (va) =>
@@ -69,7 +42,6 @@ const rename = (data, fn, k = '') => {
  * @returns a new table.
  */
 const cj = (tb, ts) => {
-    console.log(tb, ts);
     if(ts.length == 0) return tb;
     if(tb.length == 0) return ts;
     // iterate through big tables vals
@@ -80,8 +52,13 @@ const cj = (tb, ts) => {
     return res.flatMap(x => x);
 };
 
+/**
+ * Merge tables t1 and t2, return their cross product of cols.
+ * @param {*} t1 
+ * @param {*} t2 
+ * @returns a new table.
+ */
 const mergeTables = (t1, t2) => {
-    console.log('merge..', t1, t2);
     //create new table from  a cross join on t1rows with t2rows
     const vals = cj(t2.vals, t1.vals);
     return normalize({
@@ -90,13 +67,24 @@ const mergeTables = (t1, t2) => {
     });
 };
 
+/**
+ * Doesn't do anything.
+ * @param {*} table 
+ * @returns the same table.
+ */
 const normalize = (table) => {
     return table;
 };
 
+/**
+ * Concatentates the rows of two tables and pads out
+ * the rows with empty fields there are fields in one
+ * table that are not in the other.
+ * @param {*} t1 
+ * @param {*} t2 
+ * @returns a new table.
+ */
 const combineRows = (t1, t2) => {
-    
-
     // combine rows and cols, w
     // we need to ensure that any field not present
     // in either are padded out. We also need to 
@@ -120,7 +108,7 @@ const combineRows = (t1, t2) => {
         //append empty new fields to end of row
         return cols.map(m => {
             // note row is original row in t1
-            return row[t1.cols.indexOf(m)] || null;
+            return undefined !== row[t1.cols.indexOf(m)] ? row[t1.cols.indexOf(m)] : 0;
         });
         //return row.concat(Array(t2rem.length).fill(null));
     });
@@ -128,7 +116,7 @@ const combineRows = (t1, t2) => {
         //prepend empty new fields to start of row
         return cols.map(m => {
             // note row is original row in t2
-            return row[t2.cols.indexOf(m)] || null;
+            return undefined !== row[t2.cols.indexOf(m)] ? row[t2.cols.indexOf(m)] : 0;
         });
     });
    
@@ -136,20 +124,25 @@ const combineRows = (t1, t2) => {
         cols: cols,
         vals: expT1.concat(expT2)
     }); 
-
-    console.log('combine..', t1, t2, res);
-
     // using vals, create new rows
     return res;
 };
 
-const emptyTable = () =>  {
-    return {
+/**
+ * An empty table.
+ */
+const emptyTable =
+    {
         cols: [],
         vals: []
     };
-};
 
+/**
+ * A table with a single item
+ * @param {*} key 
+ * @param {*} data 
+ * @returns a new table.
+ */
 const singletonTable = (key, data) =>  {
     return {
         cols: [key],
@@ -164,21 +157,22 @@ const generateTable = (data, key = null) => {
             const table = generateTable(data[c], c);
             // merge the tables
             return mergeTables(a, table);
-        }, emptyTable());
+        }, emptyTable);
     } else if(isArray(data)) {
         // if object is an array generate table with multiple rows
         return data.map(f => generateTable(f, key)).reduce( (a, c ) => {
             return combineRows(a, c);
-        }, emptyTable());
+        }, emptyTable);
     } else {
         return singletonTable(key, data);
     }
 }
 
 
-const rootTable = generateTable(rename(ar, x => x));
-
+const rootTable = generateTable(rename(bigJSON, x => x));
 console.log('root', JSON.stringify(rootTable, null, 2));
+
+//console.log('root', JSON.stringify(rootTable.vals.filter( f => f[rootTable.cols.indexOf('.taskLists.tasks.users.email')]?.includes("davek")), null, 2));
 
 
 
